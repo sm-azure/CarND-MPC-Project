@@ -9,6 +9,9 @@
 #include "Eigen-3.3/Eigen/QR"
 #include "MPC.h"
 
+
+using namespace std;
+
 // for convenience
 using json = nlohmann::json;
 

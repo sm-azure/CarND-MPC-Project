@@ -114,6 +114,8 @@ int main() {
           //Find polynomial coeffs
           double* ptrX = &carx[0];
           double* ptrY = &cary[0];
+
+          std::cout << ptsx.size() << std::endl;
           Eigen::Map<Eigen::VectorXd> ptsxd(ptrX, ptsx.size());
           Eigen::Map<Eigen::VectorXd> ptsyd(ptrY, ptsy.size());
           auto coeffs = polyfit(ptsxd, ptsyd, 3) ;
@@ -121,7 +123,7 @@ int main() {
           // TODO: calculate the cross track error
           double cte = polyeval(coeffs, 0);
           // TODO: calculate the orientation error
-          double epsi = atan(coeffs[1]);
+          double epsi = -atan(coeffs[1]);
 
           Eigen::VectorXd state(6);
           state << 0.0, 0.0, 0.0, v, cte, epsi;
@@ -163,7 +165,7 @@ int main() {
           vector<double> next_x_vals;
           vector<double> next_y_vals;
 
-          for (double i = 0; i < 100; i += 3){
+          for (double i = 0; i < 75; i += 5){
             next_x_vals.push_back(i);
             next_y_vals.push_back(polyeval(coeffs, i));
           }

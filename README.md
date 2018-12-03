@@ -3,6 +3,21 @@ Self-Driving Car Engineer Nanodegree Program
 
 ---
 
+## The Model
+The MPC model used is as described in the course. The state relies on x, y, psi and speed of the vehicle (v). The actuator inputs are the steering angle (delta) and the throttle or brake (a). 
+
+The update equations are given below;
+
+1. x1 = x0 + v * cos(psi) * delay;
+1. y1 = y0 + v * sin(psi) * delay;
+1. psi1 = psi0 - v * delta * delay / Lf;
+1. v1 = v0 + a * delay;
+1. cte1 = cte0 + (v * sin(epsi) * delay);
+1. epsi1 = epsi0 + (v * epsi)* delay / Lf;
+
+Lf is constant for a given vechicle and needs to be empirically determined. 
+
+
 ## Dependencies
 
 * cmake >= 3.5

@@ -44,6 +44,18 @@ double polyeval(Eigen::VectorXd coeffs, double x) {
   return result;
 }
 
+//Convert from map coordinates to car coordinates
+void convertCarCoordinates(const vector<double> ptsx, const vector<double> ptsy, vector<double> &carx, vector<double> &cary,
+        const double px, const double py, const double psi){
+    for (int i =0;i< ptsx.size(); i++){
+      double delta_x = ptsx[i] - px;
+      double delta_y = ptsy[i] - py;
+      carx.push_back(delta_x * cos (-psi) - delta_y * sin(-psi));
+      cary.push_back(delta_x * sin (-psi) + delta_y * cos(-psi));
+    }
+}
+
+
 // Fit a polynomial.
 // Adapted from
 // https://github.com/JuliaMath/Polynomials.jl/blob/master/src/Polynomials.jl#L676-L716
@@ -82,7 +94,7 @@ int main() {
     // The 4 signifies a websocket message
     // The 2 signifies a websocket event
     string sdata = string(data).substr(0, length);
-    cout << sdata << endl;
+    //cout << sdata << endl;
     if (sdata.size() > 2 && sdata[0] == '4' && sdata[1] == '2') {
       string s = hasData(sdata);
       if (s != "") {
@@ -104,16 +116,12 @@ int main() {
           *
           * Both are in between [-1, 1].
           *
-          */
-          //Convert from map coordinates to car coordinates
+         */
           vector<double> carx;
           vector<double> cary;
-          for (int i =0;i< ptsx.size(); i++){
-            double delta_x = ptsx[i] - px;
-            double delta_y = ptsy[i] - py;
-            carx.push_back(delta_x * cos (-psi) - delta_y * sin(-psi));
-            cary.push_back(delta_x * sin (-psi) + delta_y * cos(-psi));
-          }
+          
+          //Convert to car coordinates
+          convertCarCoordinates(ptsx, ptsy, carx, cary, px, py, psi);
           
           //Find polynomial coeffs
           double* ptrX = &carx[0];
@@ -129,6 +137,9 @@ int main() {
           // TODO: calculate the orientation error
           double epsi = -atan(coeffs[1]);
 
+          //Convert speed to m/s
+          v = v * 0.44704;
+
           Eigen::VectorXd state(6);
           //state << 0.0, 0.0, 0.0, v, cte, epsi;
           
@@ -140,15 +151,15 @@ int main() {
           double total_delay = delay_unit * delays;
 
           //Move the state by that much given the delay from equations in the lesson
-          delta = delta * deg2rad(25); 
-          std::cout << "----Delta: " << delta << std::endl;
+          //delta = delta * deg2rad(25); 
+          //std::cout << "----Delta: " << delta << std::endl;
           const double Lf = 2.67;
           double x0 = 0 + v * cos(0.0) * total_delay;
           double y0 = 0 + v * sin(0.0) * total_delay;
           double phi = 0 - v * delta * total_delay / Lf;
           double v0 = v + a * total_delay;
           double cte0 = cte + (v * sin(epsi) * total_delay);
-          double epsi0 = epsi + (v * epsi)* total_delay / Lf;
+          double epsi0 = epsi - (v * delta)* total_delay / Lf;
 
           state << x0, y0, phi, v0, cte0, epsi0;
 

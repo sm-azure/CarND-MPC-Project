@@ -74,6 +74,8 @@ int main() {
   // MPC is initialized here!
   MPC mpc;
 
+  
+
   h.onMessage([&mpc](uWS::WebSocket<uWS::SERVER> ws, char *data, size_t length,
                      uWS::OpCode opCode) {
     // "42" at the start of the message means there's a websocket message event.
@@ -94,6 +96,8 @@ int main() {
           double py = j[1]["y"];
           double psi = j[1]["psi"];
           double v = j[1]["speed"];
+          double delta= j[1]["steering_angle"];
+          double a = j[1]["throttle"];
 
           /*
           * TODO: Calculate steering angle and throttle using MPC.
@@ -126,7 +130,25 @@ int main() {
           double epsi = -atan(coeffs[1]);
 
           Eigen::VectorXd state(6);
-          state << 0.0, 0.0, 0.0, v, cte, epsi;
+          //state << 0.0, 0.0, 0.0, v, cte, epsi;
+          
+          //However, there is now the delay to consider
+          //Lets say the delay increments in order of 100ms
+          double delay_unit = .1; //in sec
+          int delays = 1; //number of delays  (parameterizable for testing)
+
+          double total_delay = delay_unit * delays;
+
+          //Move the state by that much given the delay from equations in the lesson
+          const double Lf = 2.67;
+          double x0 = 0 + v * cos(0.0) * total_delay;
+          double y0 = 0 + v * sin(0.0) * total_delay;
+          double phi = 0 - v * delta * total_delay / Lf;
+          double v0 = v + a * total_delay;
+          double cte0 = cte + (v * sin(epsi) * total_delay);
+          double epsi0 = epsi + (v * epsi)* total_delay / Lf;
+
+          state << x0, y0, phi, v0, cte0, epsi0;
 
           auto vars = mpc.Solve(state, coeffs);
 
@@ -188,7 +210,7 @@ int main() {
           //
           // NOTE: REMEMBER TO SET THIS TO 100 MILLISECONDS BEFORE
           // SUBMITTING.
-          this_thread::sleep_for(chrono::milliseconds(01));
+          this_thread::sleep_for(chrono::milliseconds(100));
           ws.send(msg.data(), msg.length(), uWS::OpCode::TEXT);
         }
       } else {

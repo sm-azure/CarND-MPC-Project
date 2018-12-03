@@ -70,7 +70,7 @@ class FG_eval {
 
     // Minimize the value gap between sequential actuations.
     for (int t = 0; t < N - 2; t++) {
-      fg[0] += 500* CppAD::pow(vars[delta_start + t + 1] - vars[delta_start + t], 2);
+      fg[0] += 1000* CppAD::pow(vars[delta_start + t + 1] - vars[delta_start + t], 2);
       fg[0] += 500* CppAD::pow(vars[a_start + t + 1] - vars[a_start + t], 2);
     }
 
@@ -114,7 +114,7 @@ class FG_eval {
       AD<double> psides0 = CppAD::atan(coeffs[1] + 2 * coeffs[2] * x0 + 3 * coeffs[3] * CppAD::pow(x0, 2));
 
       fg[1 + x_start + t] = x1 - (x0 + v0 * CppAD::cos(psi0) * dt);
-      fg[1 + y_start + t] = y1 - (y0 + v0 * CppAD::sin(psi0) * dt);
+      fg[1 + y_start + t] = y1 - (y0 + v0 * CppAD::sin(psi0) *  dt);
       fg[1 + psi_start + t] = psi1 - (psi0 - v0 * delta0 * dt / Lf);
       fg[1 + v_start + t] = v1 - (v0 + acc0 * dt);
       fg[1 + cte_start + t] = cte1 - ((f0 - y0) + (v0 * CppAD::sin(epsi0) * dt));

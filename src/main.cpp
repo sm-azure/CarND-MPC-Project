@@ -134,12 +134,14 @@ int main() {
           
           //However, there is now the delay to consider
           //Lets say the delay increments in order of 100ms
-          double delay_unit = .1; //in sec
+          double delay_unit = 0.1; //in sec
           int delays = 1; //number of delays  (parameterizable for testing)
 
           double total_delay = delay_unit * delays;
 
           //Move the state by that much given the delay from equations in the lesson
+          delta = delta * deg2rad(25); 
+          std::cout << "----Delta: " << delta << std::endl;
           const double Lf = 2.67;
           double x0 = 0 + v * cos(0.0) * total_delay;
           double y0 = 0 + v * sin(0.0) * total_delay;
